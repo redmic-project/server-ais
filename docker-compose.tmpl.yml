@@ -1,0 +1,23 @@
+version: '3.5'
+
+services:
+  ais:
+    image: registry.redmic.net/redmic-server/${MICROSERVICE_NAME}:${IMAGE_TAG:-latest}
+    environment:
+      - SPRING_PROFILES_ACTIVE
+      - JAVA_OPTS
+    networks:
+      - kafka-net
+      - redmic-net
+    healthcheck:
+      test: wget --spider -S -t 3 http://localhost:${MICROSERVICE_PORT}/api/${MICROSERVICE_NAME}/actuator/health
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 2m
+
+networks:
+  kafka-net:
+    external: true
+  redmic-net:
+    external: true

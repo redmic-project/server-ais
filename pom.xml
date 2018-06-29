@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+   		<artifactId>spring-boot-starter-parent</artifactId>
+    	<version>2.0.0.RELEASE</version>
+		<relativePath/>
+	</parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>es.redmic</groupId>
+	<artifactId>ais</artifactId>
+	<packaging>jar</packaging>
+	<version>0.6.0</version>
+	<name>AIS</name>
+	<description>AIS rest consumer. Read vessels tracking and send to REDMIC system</description>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<java.version>1.8</java.version>
+		<tomcat.version>8.5.28</tomcat.version>
+
+		<!-- REDMIC -->
+		<redmic.broker-lib.version>0.6.0</redmic.broker-lib.version>
+		<redmic.utils.version>0.6.0</redmic.utils.version>
+		<redmic.exceptions.version>0.6.0</redmic.exceptions.version>
+
+		<!-- OTHERS -->
+		<commons-io.version>2.6</commons-io.version>
+
+		<!-- Plugins -->
+		<jacoco.version>0.8.1</jacoco.version>
+	</properties>
+
+	<dependencies>
+		<!-- Spring -->
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>io.micrometer</groupId>
+		    <artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+
+		<!-- Redmic -->
+
+		<dependency>
+			<groupId>es.redmic.lib</groupId>
+			<artifactId>broker-lib</artifactId>
+			<version>${redmic.broker-lib.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>es.redmic.lib</groupId>
+			<artifactId>utils</artifactId>
+			<version>${redmic.utils.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>es.redmic.lib</groupId>
+			<artifactId>exceptions</artifactId>
+			<version>${redmic.exceptions.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commons-io.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- tests -->
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+						<configuration>
+							<executable>true</executable>
+							<finalName>ais</finalName>
+							<outputDirectory>dist</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>pre-unit-test</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>post-unit-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

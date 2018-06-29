@@ -1,0 +1,8 @@
+version: '3.5'
+
+services:
+  ais:
+    container_name: ${MICROSERVICE_NAME}
+    restart: on-failure:3
+    ports:
+      - ${MICROSERVICE_PORT}:${MICROSERVICE_PORT}
