@@ -8,10 +8,13 @@ maven-build:
   stage: build
   image: redmic/maven-gitlab
   variables:
+    MAVEN_OPTS: -Dmaven.repo.local=.m2/repository
     SPRING_PROFILES_ACTIVE: test
-    MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository -Daishub.service.username=${AISHUB_SERVICE_USERNAME}"
+    AISHUB_SERVICE_USERNAME: ${AISHUB_SERVICE_USERNAME}
   only:
     - branches
+  except:
+    - master
   cache:
     paths:
       - .m2/repository/
@@ -90,13 +93,15 @@ deploy-dev:
     DOCKER_DRIVER: overlay2
     SSH_REMOTE: ${DEV_SSH_REMOTE}
     SERVICE: ${CI_PROJECT_NAME}
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}
     IMAGE_TAG: ${CI_COMMIT_SHA}
-    JAVA_OPTS: -Xmx512m -Xss512m -Daishub.service.username=${AISHUB_SERVICE_USERNAME}
     COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.dev.yml
   services:
     - docker:dind
   script:
-    - deploy.sh SPRING_PROFILES_ACTIVE=pre IMAGE_TAG=${IMAGE_TAG} COMPOSE_FILE=${COMPOSE_FILE} JAVA_OPTS=${JAVA_OPTS}
+    - >
+      deploy.sh IMAGE_NAME=${IMAGE_NAME} IMAGE_TAG=${IMAGE_TAG} COMPOSE_FILE=${COMPOSE_FILE}
+      SPRING_PROFILES_ACTIVE=pre AISHUB_SERVICE_USERNAME=${AISHUB_SERVICE_USERNAME}
   environment:
     name: dev
     url: https://appdev.${DEV_PUBLIC_HOSTNAME}/api/${CI_PROJECT_NAME}
@@ -110,13 +115,15 @@ deploy-supporting-branch:
     DOCKER_DRIVER: overlay2
     SSH_REMOTE: ${DEV_SSH_REMOTE}
     SERVICE: ${CI_PROJECT_NAME}
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}
     IMAGE_TAG: ${CI_COMMIT_SHA}
-    JAVA_OPTS: -Xmx512m -Xss512m -Daishub.service.username=${AISHUB_SERVICE_USERNAME}
     COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.dev.yml
   services:
     - docker:dind
   script:
-    - deploy.sh SPRING_PROFILES_ACTIVE=pre IMAGE_TAG=${IMAGE_TAG} COMPOSE_FILE=${COMPOSE_FILE} JAVA_OPTS=${JAVA_OPTS}
+    - >
+      deploy.sh IMAGE_NAME=${IMAGE_NAME} IMAGE_TAG=${IMAGE_TAG} COMPOSE_FILE=${COMPOSE_FILE}
+      SPRING_PROFILES_ACTIVE=pre AISHUB_SERVICE_USERNAME=${AISHUB_SERVICE_USERNAME}
   environment:
     name: dev
     url: https://appdev.${DEV_PUBLIC_HOSTNAME}/api/${CI_PROJECT_NAME}
@@ -134,13 +141,15 @@ deploy-pro:
     DOCKER_DRIVER: overlay2
     SSH_REMOTE: ${PRO_SSH_REMOTE}
     SERVICE: ${CI_PROJECT_NAME}
+    IMAGE_NAME: ${CI_REGISTRY_IMAGE}
     IMAGE_TAG: ${CI_COMMIT_TAG}
-    JAVA_OPTS: -Xmx512m -Xss512m -Daishub.service.username=${AISHUB_SERVICE_USERNAME}
     COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.prod.yml
   services:
     - docker:dind
   script:
-    - deploy.sh SPRING_PROFILES_ACTIVE=prod IMAGE_TAG=${IMAGE_TAG} COMPOSE_FILE=${COMPOSE_FILE} JAVA_OPTS=${JAVA_OPTS}
+    - >
+      deploy.sh IMAGE_NAME=${IMAGE_NAME} IMAGE_TAG=${IMAGE_TAG} COMPOSE_FILE=${COMPOSE_FILE}
+      SPRING_PROFILES_ACTIVE=prod AISHUB_SERVICE_USERNAME=${AISHUB_SERVICE_USERNAME}
   environment:
     name: pro
     url: https://${PRO_PUBLIC_HOSTNAME}/api/${CI_PROJECT_NAME}
