@@ -2,10 +2,13 @@ version: '3.5'
 
 services:
   ais:
-    image: registry.redmic.net/redmic-server/${MICROSERVICE_NAME}:${IMAGE_TAG:-latest}
+    image: ${IMAGE_NAME}:${IMAGE_TAG:-latest}
     environment:
+      - MICROSERVICE_NAME
+      - MICROSERVICE_PORT
       - SPRING_PROFILES_ACTIVE
-      - JAVA_OPTS
+      - AISHUB_SERVICE_USERNAME
+      - JAVA_OPTS=-Xmx512m -Xss512m
     networks:
       - kafka-net
       - redmic-net
