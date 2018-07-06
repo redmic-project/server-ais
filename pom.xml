@@ -32,6 +32,7 @@
 
 		<!-- OTHERS -->
 		<commons-io.version>2.6</commons-io.version>
+		<powermock.version>1.7.3</powermock.version>
 
 		<!-- Plugins -->
 		<jacoco.version>0.8.1</jacoco.version>
@@ -81,6 +82,17 @@
 			<version>${commons-io.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- Logs -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+		</dependency>
 
 		<!-- tests -->
 
@@ -93,6 +105,13 @@
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-easymock</artifactId>
+			<version>${powermock.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
