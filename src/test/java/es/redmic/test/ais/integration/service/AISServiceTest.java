@@ -7,6 +7,8 @@ import java.io.File;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -21,6 +23,7 @@ import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import es.redmic.ais.AISApplication;
@@ -28,12 +31,14 @@ import es.redmic.ais.exceptions.InvalidUsernameException;
 import es.redmic.ais.service.AISService;
 import es.redmic.brokerlib.avro.geodata.tracking.vessels.AISTrackingDTO;
 import es.redmic.exception.custom.ResourceNotFoundException;
+import es.redmic.testutils.kafka.KafkaBaseIntegrationTest;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = { AISApplication.class })
 @ActiveProfiles("test")
+@TestPropertySource(properties = { "schema.registry.port=18081" })
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-public class AISServiceTest {
+public class AISServiceTest extends KafkaBaseIntegrationTest {
 
 	@Autowired
 	AISService aisService;
@@ -45,6 +50,11 @@ public class AISServiceTest {
 	public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1);
 
 	protected BlockingQueue<Object> blockingQueue;
+
+	@PostConstruct
+	public void CreateVesselFromTrackingTestPostConstruct() throws Exception {
+		createSchemaRegistryRestApp(embeddedKafka.getZookeeperConnectionString(), embeddedKafka.getBrokersAsString());
+	}
 
 	@Before
 	public void setup() {
