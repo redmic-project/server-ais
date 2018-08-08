@@ -52,7 +52,7 @@ public class AISServiceTest extends KafkaBaseIntegrationTest {
 	protected BlockingQueue<Object> blockingQueue;
 
 	@PostConstruct
-	public void CreateVesselFromTrackingTestPostConstruct() throws Exception {
+	public void AISServiceTestPostConstruct() throws Exception {
 		createSchemaRegistryRestApp(embeddedKafka.getZookeeperConnectionString(), embeddedKafka.getBrokersAsString());
 	}
 
