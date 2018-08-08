@@ -2,8 +2,6 @@ version: '3.5'
 
 services:
   ais:
-    ports:
-      - ${MICROSERVICE_PORT}
     networks:
       - traefik-net
     deploy:
