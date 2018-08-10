@@ -1,4 +1,7 @@
-FROM redmic/redmic-server
+ARG PARENT_IMAGE_NAME
+ARG PARENT_IMAGE_TAG
+
+FROM ${PARENT_IMAGE_NAME}:${PARENT_IMAGE_TAG}
 
 COPY /dist/*.jar ./
 
