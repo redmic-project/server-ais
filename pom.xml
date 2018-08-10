@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
    		<artifactId>spring-boot-starter-parent</artifactId>
-    	<version>2.0.0.RELEASE</version>
+    	<version>2.0.3.RELEASE</version>
 		<relativePath/>
 	</parent>
 
@@ -29,9 +29,12 @@
 		<redmic.broker-lib.version>0.6.0</redmic.broker-lib.version>
 		<redmic.utils.version>0.6.0</redmic.utils.version>
 		<redmic.exceptions.version>0.6.0</redmic.exceptions.version>
+		<redmic.test-utils.version>0.6.0</redmic.test-utils.version>
 
 		<!-- OTHERS -->
+		<kafka.version>1.1.0</kafka.version>
 		<commons-io.version>2.6</commons-io.version>
+		<powermock.version>1.7.3</powermock.version>
 
 		<!-- Plugins -->
 		<jacoco.version>0.8.1</jacoco.version>
@@ -81,6 +84,17 @@
 			<version>${commons-io.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- Logs -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+		</dependency>
 
 		<!-- tests -->
 
@@ -89,13 +103,55 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>es.redmic.lib</groupId>
+			<artifactId>test-utils</artifactId>
+			<version>${redmic.test-utils.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-clients</artifactId>
+			<version>${kafka.version}</version>
+			<classifier>test</classifier>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka_2.11</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka_2.11</artifactId>
+			<version>${kafka.version}</version>
+			<classifier>test</classifier>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-easymock</artifactId>
+			<version>${powermock.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
+	<repositories>
+		<repository>
+			<id>confluent</id>
+			<name>Confluent</name>
+			<url>https://packages.confluent.io/maven/</url>
+		</repository>
+	</repositories>
 	<build>
 		<plugins>
 			<plugin>

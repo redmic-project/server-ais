@@ -1,10 +1,12 @@
-FROM redmic/redmic-server
+ARG PARENT_IMAGE_NAME
+ARG PARENT_IMAGE_TAG
+
+FROM ${PARENT_IMAGE_NAME}:${PARENT_IMAGE_TAG}
 
 COPY /dist/*.jar ./
 
-EXPOSE 8090
+EXPOSE ${MICROSERVICE_PORT}
 
-ENTRYPOINT java $JAVA_OPTS \
+ENTRYPOINT java ${JAVA_OPTS} \
 	-Djava.security.egd=file:/dev/./urandom \
-	-Dlogging.level.org.springframework=${LOG_LEVEL} \
-	-jar ${DIRPATH}/ais.jar
+	-jar ${DIRPATH}/${MICROSERVICE_NAME}.jar
