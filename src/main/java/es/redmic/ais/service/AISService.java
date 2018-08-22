@@ -35,6 +35,9 @@ public class AISService {
 
 	protected static Logger logger = LogManager.getLogger();
 
+	@Value("${broker.topic.realtime.tracking.vessels.key.prefix}")
+	private String prefix;
+
 	@Value("${aishub.service.url}")
 	private String urlAIS;
 
@@ -131,7 +134,7 @@ public class AISService {
 		logger.info("Tracking vessel: " + dto.getMmsi());
 
 		ListenableFuture<SendResult<String, AISTrackingDTO>> future = kafkaTemplate.send(TOPIC,
-				dto.getMmsi().toString(), dto);
+				prefix + dto.getMmsi().toString(), dto);
 
 		future.addCallback(new SendListener());
 	}
