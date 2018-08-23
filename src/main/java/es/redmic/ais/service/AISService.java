@@ -131,8 +131,6 @@ public class AISService {
 
 	private void publishToKafka(AISTrackingDTO dto) {
 
-		logger.info("Tracking vessel: " + dto.getMmsi());
-
 		ListenableFuture<SendResult<String, AISTrackingDTO>> future = kafkaTemplate.send(TOPIC,
 				prefix + dto.getMmsi().toString(), dto);
 
