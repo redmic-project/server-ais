@@ -2,7 +2,23 @@ version: '3.5'
 
 services:
   ais:
-    container_name: ${MICROSERVICE_NAME}
-    restart: on-failure:3
     ports:
       - ${MICROSERVICE_PORT}:${MICROSERVICE_PORT}
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        traefik.port: "${MICROSERVICE_PORT}"
+        traefik.docker.network: traefik-net
+        traefik.frontend.rule: PathPrefix:/api/${MICROSERVICE_NAME}
+        traefik.backend: ${MICROSERVICE_NAME}
+      restart_policy:
+        condition: on-failure
+        delay: 1m
+        window: 3m
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          memory: 410M
