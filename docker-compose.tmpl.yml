@@ -9,10 +9,11 @@ services:
       - SPRING_PROFILES_ACTIVE
       - AISHUB_SERVICE_USERNAME
       - APP_SCHEDULING_ENABLE
-      - JAVA_OPTS=-Xmx512m -Xss512m
+      - JAVA_OPTS=-XX:MaxRAMFraction=1
     networks:
       - kafka-net
       - redmic-net
+      - traefik-net
     healthcheck:
       test: wget --spider -S -t 3 http://localhost:${MICROSERVICE_PORT}/api/${MICROSERVICE_NAME}/actuator/health
       interval: 30s
@@ -24,4 +25,6 @@ networks:
   kafka-net:
     external: true
   redmic-net:
+    external: true
+  traefik-net:
     external: true

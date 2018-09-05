@@ -7,6 +7,5 @@ COPY /dist/*.jar ./
 
 EXPOSE ${MICROSERVICE_PORT}
 
-ENTRYPOINT java ${JAVA_OPTS} \
-	-Djava.security.egd=file:/dev/./urandom \
+ENTRYPOINT ${JAVA_BIN} ${DEFAULT_JAVA_OPTS} ${JAVA_OPTS} \
 	-jar ${DIRPATH}/${MICROSERVICE_NAME}.jar
