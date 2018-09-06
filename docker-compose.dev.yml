@@ -3,7 +3,9 @@ version: '3.5'
 services:
   ais:
     ports:
-      - ${MICROSERVICE_PORT}:${MICROSERVICE_PORT}
+      - target: ${MICROSERVICE_PORT}
+        published: ${MICROSERVICE_PORT}
+        mode: host
     deploy:
       mode: replicated
       replicas: 1
