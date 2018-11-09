@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
    		<artifactId>spring-boot-starter-parent</artifactId>
-    	<version>2.0.3.RELEASE</version>
+    	<version>2.1.0.RELEASE</version>
 		<relativePath/>
 	</parent>
 
@@ -32,7 +32,7 @@
 		<redmic.test-utils.version>0.6.0</redmic.test-utils.version>
 
 		<!-- OTHERS -->
-		<kafka.version>1.1.0</kafka.version>
+		<kafka.version>2.0.0</kafka.version>
 		<commons-io.version>2.6</commons-io.version>
 		<powermock.version>1.7.3</powermock.version>
 
