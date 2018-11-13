@@ -124,6 +124,7 @@ public class AISServiceTest extends KafkaBaseIntegrationTest {
 		assertNotNull(dto.getLatitude());
 		assertNotNull(dto.getLongitude());
 		assertNotNull(dto.getTstamp());
+		assertNotNull(dto.getType());
 
 		blockingQueue.offer(dto);
 	}
