@@ -12,16 +12,19 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import es.redmic.ais.exceptions.InvalidUsernameException;
-import es.redmic.brokerlib.avro.geodata.tracking.vessels.AISTrackingDTO;
+import es.redmic.brokerlib.avro.common.CommonDTO;
 import es.redmic.brokerlib.listener.SendListener;
 import es.redmic.exception.custom.ResourceNotFoundException;
 import es.redmic.utils.compressor.Zip;
 import es.redmic.utils.csv.DataLoaderIngestData;
+import es.redmic.vesselslib.dto.ais.AISTrackingDTO;
+import es.redmic.vesselslib.dto.tracking.VesselTrackingDTO;
+import es.redmic.vesselslib.dto.vessel.VesselDTO;
+import es.redmic.vesselslib.utils.VesselTrackingUtil;
+import es.redmic.vesselslib.utils.VesselUtil;
 
 @Service
 public class AISService {
@@ -35,14 +38,17 @@ public class AISService {
 
 	protected static Logger logger = LogManager.getLogger();
 
-	@Value("${broker.topic.realtime.tracking.vessels.key.prefix}")
-	private String prefix;
-
 	@Value("${aishub.service.url}")
 	private String urlAIS;
 
 	@Value("${broker.topic.realtime.tracking.vessels}")
-	private String TOPIC;
+	private String VESSEL_TRACKING_TOPIC;
+
+	@Value("${broker.topic.realtime.ais}")
+	private String AIS_TOPIC;
+
+	@Value("${broker.topic.realtime.vessels}")
+	private String VESSEL_TOPIC;
 
 	@Value("${file.delimiter.csv}")
 	private String delimiterCSV;
@@ -53,8 +59,20 @@ public class AISService {
 	private String nameCompressFile = "ais.zip";
 	private String nameFile = "data.csv";
 
+	@Value("${qflag.default}")
+	private String QFLAG_DEFAULT;
+
+	@Value("${vflag.default}")
+	private String VFLAG_DEFAULT;
+
+	@Value("${vesseltracking-activity-id}")
+	protected String activityId;
+
 	@Autowired
-	private KafkaTemplate<String, AISTrackingDTO> kafkaTemplate;
+	private KafkaTemplate<String, AISTrackingDTO> aisTemplate;
+
+	@Autowired
+	private KafkaTemplate<String, CommonDTO> vesselTemplate;
 
 	public void fetchData() {
 
@@ -129,12 +147,27 @@ public class AISService {
 		publishToKafka(dto);
 	}
 
-	private void publishToKafka(AISTrackingDTO dto) {
+	private void publishToKafka(AISTrackingDTO aisTracking) {
 
-		ListenableFuture<SendResult<String, AISTrackingDTO>> future = kafkaTemplate.send(TOPIC,
-				prefix + dto.getMmsi().toString(), dto);
+		// @formatter:off
+		String vesselId = VesselUtil.generateId(aisTracking.getMmsi()),
+				vesselTrackingId = VesselTrackingUtil.generateId(aisTracking.getMmsi(), aisTracking.getTstamp().getMillis());
+		// @formatter:on
 
-		future.addCallback(new SendListener());
+		// Envía dto de datos brutos para sink de postgresql
+		aisTemplate.send(AIS_TOPIC, vesselId, aisTracking).addCallback(new SendListener());
+
+		VesselTrackingDTO tracking = VesselTrackingUtil.convertTrackToVesselTracking(aisTracking, QFLAG_DEFAULT,
+				VFLAG_DEFAULT, activityId);
+
+		// Envía dto de tracking para procesarlo + sink
+
+		vesselTemplate.send(VESSEL_TRACKING_TOPIC, vesselTrackingId, tracking).addCallback(new SendListener());
+
+		VesselDTO vessel = tracking.getProperties().getVessel();
+
+		// Envía dto de vessel para procesarlo
+		vesselTemplate.send(VESSEL_TOPIC, vesselId, vessel).addCallback(new SendListener());
 	}
 
 	private void removeZipFile() {

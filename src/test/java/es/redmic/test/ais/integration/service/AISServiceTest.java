@@ -29,9 +29,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import es.redmic.ais.AISApplication;
 import es.redmic.ais.exceptions.InvalidUsernameException;
 import es.redmic.ais.service.AISService;
-import es.redmic.brokerlib.avro.geodata.tracking.vessels.AISTrackingDTO;
 import es.redmic.exception.custom.ResourceNotFoundException;
 import es.redmic.testutils.kafka.KafkaBaseIntegrationTest;
+import es.redmic.vesselslib.dto.ais.AISTrackingDTO;
+import es.redmic.vesselslib.dto.tracking.VesselTrackingDTO;
+import es.redmic.vesselslib.dto.vessel.VesselDTO;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = { AISApplication.class })
@@ -49,7 +51,13 @@ public class AISServiceTest extends KafkaBaseIntegrationTest {
 	@ClassRule
 	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1);
 
-	protected BlockingQueue<Object> blockingQueue;
+	// @formatter:off
+
+	protected BlockingQueue<Object> blockingQueueVesselTracking,
+		blockingQueueAIS,
+		blockingQueueVessel;
+
+	// @formatter:on
 
 	@PostConstruct
 	public void AISServiceTestPostConstruct() throws Exception {
@@ -60,7 +68,9 @@ public class AISServiceTest extends KafkaBaseIntegrationTest {
 	@Before
 	public void setup() {
 
-		blockingQueue = new LinkedBlockingDeque<>();
+		blockingQueueVesselTracking = new LinkedBlockingDeque<>();
+		blockingQueueAIS = new LinkedBlockingDeque<>();
+		blockingQueueVessel = new LinkedBlockingDeque<>();
 	}
 
 	@Test(expected = ResourceNotFoundException.class)
@@ -84,8 +94,14 @@ public class AISServiceTest extends KafkaBaseIntegrationTest {
 
 		Thread.sleep(500);
 
-		// Espera que se publiquen 23016 registros a kafka
-		assertEquals(23016, blockingQueue.size());
+		// Espera que se publiquen 23016 registros al topic de vesselTracking
+		assertEquals(23016, blockingQueueVesselTracking.size());
+
+		// Espera que se publiquen 23016 registros al topic de ais
+		assertEquals(23016, blockingQueueAIS.size());
+
+		// Espera que se publiquen 23016 registros al topic de vessel
+		assertEquals(23016, blockingQueueVessel.size());
 	}
 
 	@Test(expected = InvalidUsernameException.class)
@@ -117,7 +133,19 @@ public class AISServiceTest extends KafkaBaseIntegrationTest {
 	}
 
 	@KafkaListener(topics = "${broker.topic.realtime.tracking.vessels}")
-	public void updateVessels(AISTrackingDTO dto) {
+	public void vesselTracking(VesselTrackingDTO dto) {
+
+		assertNotNull(dto);
+		assertNotNull(dto.getGeometry());
+		assertNotNull(dto.getProperties().getDate());
+		assertNotNull(dto.getProperties().getVessel().getMmsi());
+		assertNotNull(dto.getProperties().getVessel().getType().getCode());
+
+		blockingQueueVesselTracking.offer(dto);
+	}
+
+	@KafkaListener(topics = "${broker.topic.realtime.ais}")
+	public void ais(AISTrackingDTO dto) {
 
 		assertNotNull(dto);
 		assertNotNull(dto.getMmsi());
@@ -126,6 +154,16 @@ public class AISServiceTest extends KafkaBaseIntegrationTest {
 		assertNotNull(dto.getTstamp());
 		assertNotNull(dto.getType());
 
-		blockingQueue.offer(dto);
+		blockingQueueAIS.offer(dto);
+	}
+
+	@KafkaListener(topics = "${broker.topic.realtime.vessels}")
+	public void vessels(VesselDTO dto) {
+
+		assertNotNull(dto);
+		assertNotNull(dto.getMmsi());
+		assertNotNull(dto.getType());
+
+		blockingQueueVessel.offer(dto);
 	}
 }
