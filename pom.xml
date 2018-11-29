@@ -28,6 +28,7 @@
 
 		<!-- REDMIC -->
 		<redmic.broker-lib.version>0.6.0</redmic.broker-lib.version>
+		<redmic.vessels-lib.version>0.6.0</redmic.vessels-lib.version>
 		<redmic.utils.version>0.6.0</redmic.utils.version>
 		<redmic.exceptions.version>0.6.0</redmic.exceptions.version>
 		<redmic.test-utils.version>0.6.0</redmic.test-utils.version>
@@ -65,6 +66,12 @@
 			<groupId>es.redmic.lib</groupId>
 			<artifactId>broker-lib</artifactId>
 			<version>${redmic.broker-lib.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>es.redmic.vessels</groupId>
+			<artifactId>vessels-lib</artifactId>
+			<version>${redmic.vessels-lib.version}</version>
 		</dependency>
 
 		<dependency>
