@@ -74,6 +74,13 @@ public class AISService {
 	@Autowired
 	private KafkaTemplate<String, CommonDTO> vesselTemplate;
 
+	// @formatter:off
+	
+	private long maxDateBefore = -1,
+			maxDateCurrent = -1;
+	
+	// @formatter:on
+
 	public void fetchData() {
 
 		prepareFile();
@@ -120,6 +127,9 @@ public class AISService {
 			processRow(row);
 		}
 
+		maxDateBefore = maxDateCurrent;
+		maxDateCurrent = -1;
+
 		file.delete();
 	}
 
@@ -144,7 +154,25 @@ public class AISService {
 
 		dto.buildFromMap(row);
 
-		publishToKafka(dto);
+		if (dataFulfillConstraints(dto)) {
+			publishToKafka(dto);
+		}
+	}
+
+	private boolean dataFulfillConstraints(AISTrackingDTO dto) {
+
+		if (dto.getMmsi() == null && dto.getTstamp() == null) {
+			return false;
+		}
+
+		if (dto.getTstamp().getMillis() < maxDateBefore) {
+			return false;
+		}
+
+		if (dto.getTstamp().getMillis() > maxDateCurrent) {
+			maxDateCurrent = dto.getTstamp().getMillis();
+		}
+		return true;
 	}
 
 	private void publishToKafka(AISTrackingDTO aisTracking) {

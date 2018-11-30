@@ -39,7 +39,7 @@ import es.redmic.vesselslib.dto.vessel.VesselDTO;
 @SpringBootTest(classes = { AISApplication.class })
 @ActiveProfiles("test")
 @TestPropertySource(properties = { "schema.registry.port=18081" })
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class AISServiceTest extends KafkaBaseIntegrationTest {
 
 	@Autowired
@@ -82,26 +82,40 @@ public class AISServiceTest extends KafkaBaseIntegrationTest {
 	@Test
 	public void processFile_ShouldSendMessageToKafka_IfDataIsCorrect() throws Exception {
 
+		// Coloca el primer fichero de test en el lugar correspondiente
 		File srcFile = new File("src/test/resources/ais.zip");
-
 		File destFile = new File(directoryPath + "/ais.zip");
-
 		FileUtils.copyFile(srcFile, destFile);
 
+		// Invoca los métodos como si se hubiera ejecutado desde el schedule
 		Whitebox.invokeMethod(aisService, "unzip");
-
 		Whitebox.invokeMethod(aisService, "processFile");
 
-		Thread.sleep(500);
+		// Coloca el segundo fichero de test en el lugar correspondiente
+		File srcFile2 = new File("src/test/resources/ais2.zip");
+		File destFile2 = new File(directoryPath + "/ais2.zip");
+		FileUtils.copyFile(srcFile2, destFile2);
 
-		// Espera que se publiquen 23016 registros al topic de vesselTracking
-		assertEquals(23016, blockingQueueVesselTracking.size());
+		// Cambia nombre dentro del servicio e invoca los métodos de nuevo para procesar
+		// el segundo fichero
+		Whitebox.setInternalState(aisService, "nameCompressFile", "ais2.zip");
+		Whitebox.invokeMethod(aisService, "unzip");
+		Whitebox.invokeMethod(aisService, "processFile");
 
-		// Espera que se publiquen 23016 registros al topic de ais
-		assertEquals(23016, blockingQueueAIS.size());
+		// Espera un tiempo para que pueda terminar de procesar los dos ficheros
+		Thread.sleep(23000);
 
-		// Espera que se publiquen 23016 registros al topic de vessel
-		assertEquals(23016, blockingQueueVessel.size());
+		int numOfItems = 41998; // Debería procesar 41976 pero repite 36 elementos que llegan en el segundo
+								// fichero con el mismo tstamp
+
+		// Espera que se publiquen numOfItems registros al topic de vesselTracking
+		assertEquals(numOfItems, blockingQueueVesselTracking.size());
+
+		// Espera que se publiquen numOfItems registros al topic de ais
+		assertEquals(numOfItems, blockingQueueAIS.size());
+
+		// Espera que se publiquen numOfItems registros al topic de vessel
+		assertEquals(numOfItems, blockingQueueVessel.size());
 	}
 
 	@Test(expected = InvalidUsernameException.class)
