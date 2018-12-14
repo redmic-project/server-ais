@@ -14,7 +14,7 @@
 	<groupId>es.redmic</groupId>
 	<artifactId>ais</artifactId>
 	<packaging>jar</packaging>
-	<version>0.6.0</version>
+	<version>0.7.0</version>
 	<name>AIS</name>
 	<description>AIS rest consumer. Read vessels tracking and send to REDMIC system</description>
 
@@ -27,11 +27,11 @@
 		<tomcat.version>8.5.28</tomcat.version>
 
 		<!-- REDMIC -->
-		<redmic.broker-lib.version>0.6.0</redmic.broker-lib.version>
-		<redmic.vessels-lib.version>0.6.0</redmic.vessels-lib.version>
-		<redmic.utils.version>0.6.0</redmic.utils.version>
+		<redmic.broker-lib.version>0.7.0</redmic.broker-lib.version>
+		<redmic.vessels-lib.version>0.7.0</redmic.vessels-lib.version>
+		<redmic.utils.version>0.7.0</redmic.utils.version>
 		<redmic.exceptions.version>0.6.0</redmic.exceptions.version>
-		<redmic.test-utils.version>0.6.0</redmic.test-utils.version>
+		<redmic.test-utils.version>0.7.0</redmic.test-utils.version>
 
 		<!-- OTHERS -->
 		<kafka.version>2.0.1</kafka.version>
