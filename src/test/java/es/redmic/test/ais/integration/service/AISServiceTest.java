@@ -105,17 +105,22 @@ public class AISServiceTest extends KafkaBaseIntegrationTest {
 		// Espera un tiempo para que pueda terminar de procesar los dos ficheros
 		Thread.sleep(23000);
 
-		int numOfItems = 41998; // Debería procesar 41976 pero repite 36 elementos que llegan en el segundo
-								// fichero con el mismo tstamp
+		// @formatter:off
 
-		// Espera que se publiquen numOfItems registros al topic de vesselTracking
-		assertEquals(numOfItems, blockingQueueVesselTracking.size());
+		int numOfItems = 41998, // Debería procesar 41976 pero repite 36 elementos que llegan en el segundo
+				numOfItemsInBbox = 86; 
+		// @formatter:on
+
+		// fichero con el mismo tstamp
 
 		// Espera que se publiquen numOfItems registros al topic de ais
 		assertEquals(numOfItems, blockingQueueAIS.size());
 
-		// Espera que se publiquen numOfItems registros al topic de vessel
-		assertEquals(numOfItems, blockingQueueVessel.size());
+		// Espera que se publiquen numOfItemsInBbox registros al topic de vesselTracking
+		assertEquals(numOfItemsInBbox, blockingQueueVesselTracking.size());
+
+		// Espera que se publiquen numOfItemsInBbox registros al topic de vessel
+		assertEquals(numOfItemsInBbox, blockingQueueVessel.size());
 	}
 
 	@Test(expected = InvalidUsernameException.class)

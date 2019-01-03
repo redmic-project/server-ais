@@ -6,9 +6,13 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -73,6 +77,26 @@ public class AISService {
 
 	@Autowired
 	private KafkaTemplate<String, CommonDTO> vesselTemplate;
+
+	@Value("${bboxFilter.bottomRightLat}")
+	private double bottomRightLat; // = 26
+
+	@Value("${bboxFilter.bottomRightLon}")
+	private double bottomRightLon; // = -10,
+
+	@Value("${bboxFilter.topLeftLat}")
+	private double topLeftLat; // = 30,
+
+	@Value("${bboxFilter.topLeftLon}")
+	private double topLeftLon; // = -21;
+
+	Envelope envelopeJts;
+
+	@PostConstruct
+	private void aisServicePostConstruct() {
+
+		envelopeJts = new Envelope(bottomRightLon, topLeftLon, topLeftLat, bottomRightLat);
+	}
 
 	// @formatter:off
 	
@@ -185,17 +209,25 @@ public class AISService {
 		// Envía dto de datos brutos para sink de postgresql
 		aisTemplate.send(AIS_TOPIC, vesselId, aisTracking).addCallback(new SendListener());
 
-		VesselTrackingDTO tracking = VesselTrackingUtil.convertTrackToVesselTracking(aisTracking, QFLAG_DEFAULT,
-				VFLAG_DEFAULT, activityId);
+		// Si el punto está en la zona de interés
+		if (pointInBbox(aisTracking.getLongitude(), aisTracking.getLatitude())) {
 
-		// Envía dto de tracking para procesarlo + sink
+			VesselTrackingDTO tracking = VesselTrackingUtil.convertTrackToVesselTracking(aisTracking, QFLAG_DEFAULT,
+					VFLAG_DEFAULT, activityId);
 
-		vesselTemplate.send(VESSEL_TRACKING_TOPIC, vesselTrackingId, tracking).addCallback(new SendListener());
+			// Envía dto de tracking para procesarlo + sink
 
-		VesselDTO vessel = tracking.getProperties().getVessel();
+			vesselTemplate.send(VESSEL_TRACKING_TOPIC, vesselTrackingId, tracking).addCallback(new SendListener());
 
-		// Envía dto de vessel para procesarlo
-		vesselTemplate.send(VESSEL_TOPIC, vesselId, vessel).addCallback(new SendListener());
+			VesselDTO vessel = tracking.getProperties().getVessel();
+
+			// Envía dto de vessel para procesarlo
+			vesselTemplate.send(VESSEL_TOPIC, vesselId, vessel).addCallback(new SendListener());
+		}
+	}
+
+	private boolean pointInBbox(Double x, Double y) {
+		return envelopeJts.contains(new Coordinate(x, y));
 	}
 
 	private void removeZipFile() {
