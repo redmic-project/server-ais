@@ -108,7 +108,7 @@ public class AISServiceTest extends KafkaBaseIntegrationTest {
 		// @formatter:off
 
 		int numOfItems = 41998, // Debería procesar 41976 pero repite 36 elementos que llegan en el segundo
-				numOfItemsInBbox = 86; 
+				numOfItemsInBbox = 91; 
 		// @formatter:on
 
 		// fichero con el mismo tstamp

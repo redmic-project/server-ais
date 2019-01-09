@@ -90,6 +90,9 @@ public class AISService {
 	@Value("${bboxFilter.topLeftLon}")
 	private double topLeftLon; // = -21;
 
+	@Value("#{'${destFilter}'.split(',')}")
+	private List<String> destFilter;
+
 	Envelope envelopeJts;
 
 	@PostConstruct
@@ -210,7 +213,8 @@ public class AISService {
 		aisTemplate.send(AIS_TOPIC, vesselId, aisTracking).addCallback(new SendListener());
 
 		// Si el punto está en la zona de interés
-		if (pointInBbox(aisTracking.getLongitude(), aisTracking.getLatitude())) {
+		if (destFilter.contains(aisTracking.getDest())
+				|| pointInBbox(aisTracking.getLongitude(), aisTracking.getLatitude())) {
 
 			VesselTrackingDTO tracking = VesselTrackingUtil.convertTrackToVesselTracking(aisTracking, QFLAG_DEFAULT,
 					VFLAG_DEFAULT, activityId);
