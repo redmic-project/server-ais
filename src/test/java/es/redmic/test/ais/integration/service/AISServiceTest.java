@@ -108,7 +108,7 @@ public class AISServiceTest extends KafkaBaseIntegrationTest {
 		// @formatter:off
 
 		int numOfItems = 41998, // Debería procesar 41976 pero repite 36 elementos que llegan en el segundo
-				numOfItemsInBbox = 91; 
+				numOfItemsToProccess = 94; 
 		// @formatter:on
 
 		// fichero con el mismo tstamp
@@ -117,10 +117,10 @@ public class AISServiceTest extends KafkaBaseIntegrationTest {
 		assertEquals(numOfItems, blockingQueueAIS.size());
 
 		// Espera que se publiquen numOfItemsInBbox registros al topic de vesselTracking
-		assertEquals(numOfItemsInBbox, blockingQueueVesselTracking.size());
+		assertEquals(numOfItemsToProccess, blockingQueueVesselTracking.size());
 
 		// Espera que se publiquen numOfItemsInBbox registros al topic de vessel
-		assertEquals(numOfItemsInBbox, blockingQueueVessel.size());
+		assertEquals(numOfItemsToProccess, blockingQueueVessel.size());
 	}
 
 	@Test(expected = InvalidUsernameException.class)

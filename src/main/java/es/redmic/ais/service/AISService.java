@@ -213,9 +213,12 @@ public class AISService {
 		aisTemplate.send(AIS_TOPIC, vesselId, aisTracking).addCallback(new SendListener());
 
 		// Si el punto está en la zona de interés
-		if (destFilter.contains(aisTracking.getDest())
+
+		if ((aisTracking.getDest() != null && destFilter.stream().anyMatch(str -> isDest(aisTracking, str)))
 				|| pointInBbox(aisTracking.getLongitude(), aisTracking.getLatitude())) {
 
+			if (aisTracking.getDest() != null)
+				destFilter.stream().anyMatch(str -> isDest(aisTracking, str));
 			VesselTrackingDTO tracking = VesselTrackingUtil.convertTrackToVesselTracking(aisTracking, QFLAG_DEFAULT,
 					VFLAG_DEFAULT, activityId);
 
@@ -228,6 +231,11 @@ public class AISService {
 			// Envía dto de vessel para procesarlo
 			vesselTemplate.send(VESSEL_TOPIC, vesselId, vessel).addCallback(new SendListener());
 		}
+	}
+
+	private boolean isDest(AISTrackingDTO aisTracking, String dest) {
+
+		return aisTracking.getDest().toLowerCase().contains(dest.toLowerCase());
 	}
 
 	private boolean pointInBbox(Double x, Double y) {
