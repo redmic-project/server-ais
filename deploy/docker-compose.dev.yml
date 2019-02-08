@@ -6,3 +6,10 @@ services:
       - target: ${MICROSERVICE_PORT}
         published: ${MICROSERVICE_PORT}
         mode: host
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          memory: 410M
