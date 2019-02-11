@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
-   		<artifactId>spring-boot-starter-parent</artifactId>
-    	<version>2.0.3.RELEASE</version>
-		<relativePath/>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.1.0.RELEASE</version>
+		<relativePath />
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.redmic</groupId>
 	<artifactId>ais</artifactId>
 	<packaging>jar</packaging>
-	<version>0.6.0</version>
+	<version>0.8.0</version>
 	<name>AIS</name>
 	<description>AIS rest consumer. Read vessels tracking and send to REDMIC system</description>
-	
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -26,13 +27,14 @@
 		<tomcat.version>8.5.28</tomcat.version>
 
 		<!-- REDMIC -->
-		<redmic.broker-lib.version>0.6.0</redmic.broker-lib.version>
-		<redmic.utils.version>0.6.0</redmic.utils.version>
-		<redmic.exceptions.version>0.6.0</redmic.exceptions.version>
-		<redmic.test-utils.version>0.6.0</redmic.test-utils.version>
+		<redmic.broker-lib.version>0.8.0</redmic.broker-lib.version>
+		<redmic.vessels-lib.version>0.8.0</redmic.vessels-lib.version>
+		<redmic.utils.version>0.8.0</redmic.utils.version>
+		<redmic.exceptions.version>0.7.0</redmic.exceptions.version>
+		<redmic.test-utils.version>0.8.0</redmic.test-utils.version>
 
 		<!-- OTHERS -->
-		<kafka.version>1.1.0</kafka.version>
+		<kafka.version>2.0.1</kafka.version>
 		<commons-io.version>2.6</commons-io.version>
 		<powermock.version>1.7.3</powermock.version>
 
@@ -47,15 +49,15 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>io.micrometer</groupId>
-		    <artifactId>micrometer-registry-prometheus</artifactId>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>
 
 		<!-- Redmic -->
@@ -64,6 +66,12 @@
 			<groupId>es.redmic.lib</groupId>
 			<artifactId>broker-lib</artifactId>
 			<version>${redmic.broker-lib.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>es.redmic.vessels</groupId>
+			<artifactId>vessels-lib</artifactId>
+			<version>${redmic.vessels-lib.version}</version>
 		</dependency>
 
 		<dependency>
@@ -84,13 +92,13 @@
 			<version>${commons-io.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<!-- Logs -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
@@ -103,7 +111,7 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>es.redmic.lib</groupId>
 			<artifactId>test-utils</artifactId>
@@ -116,7 +124,7 @@
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka-clients</artifactId>
@@ -137,7 +145,7 @@
 			<classifier>test</classifier>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-api-easymock</artifactId>
@@ -157,18 +165,11 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-						<configuration>
-							<executable>true</executable>
-							<finalName>ais</finalName>
-							<outputDirectory>dist</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
+				<configuration>
+					<executable>true</executable>
+					<finalName>ais</finalName>
+					<outputDirectory>dist</outputDirectory>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>

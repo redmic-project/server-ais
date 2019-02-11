@@ -3,23 +3,12 @@ version: '3.5'
 services:
   ais:
     deploy:
-      mode: replicated
-      replicas: 1
-      labels:
-        traefik.port: "${MICROSERVICE_PORT}"
-        traefik.docker.network: traefik-net
-        traefik.frontend.rule: PathPrefix:/api/${MICROSERVICE_NAME}
-        traefik.backend: ${MICROSERVICE_NAME}
       placement:
         constraints:
           - node.role == worker
-      restart_policy:
-        condition: on-failure
-        delay: 1m
-        window: 3m
       resources:
         limits:
           cpus: '0.5'
-          memory: 512M
+          memory: 1G
         reservations:
-          memory: 410M
+          memory: 820M

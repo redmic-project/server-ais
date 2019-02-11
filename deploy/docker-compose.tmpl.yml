@@ -15,16 +15,29 @@ services:
       - redmic-net
       - traefik-net
     healthcheck:
-      test: wget --spider -S -t 3 http://localhost:${MICROSERVICE_PORT}/api/${MICROSERVICE_NAME}/actuator/health
+      test: wget --spider -q http://localhost:${MICROSERVICE_PORT}/api/${MICROSERVICE_NAME}/actuator/health
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 2m
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        traefik.frontend.rule: Host:${PUBLIC_HOSTNAME};PathPrefix:/api/${MICROSERVICE_NAME}
+        traefik.backend: ${MICROSERVICE_NAME}
+        traefik.port: "${MICROSERVICE_PORT}"
+      restart_policy:
+        condition: on-failure
+        delay: 1m
+        window: 3m
 
 networks:
   kafka-net:
     external: true
+
   redmic-net:
     external: true
+
   traefik-net:
     external: true

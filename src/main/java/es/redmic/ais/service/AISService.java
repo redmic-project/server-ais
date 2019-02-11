@@ -6,22 +6,29 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import es.redmic.ais.exceptions.InvalidUsernameException;
-import es.redmic.brokerlib.avro.geodata.tracking.vessels.AISTrackingDTO;
+import es.redmic.brokerlib.avro.common.CommonDTO;
 import es.redmic.brokerlib.listener.SendListener;
 import es.redmic.exception.custom.ResourceNotFoundException;
 import es.redmic.utils.compressor.Zip;
 import es.redmic.utils.csv.DataLoaderIngestData;
+import es.redmic.vesselslib.dto.ais.AISTrackingDTO;
+import es.redmic.vesselslib.dto.tracking.VesselTrackingDTO;
+import es.redmic.vesselslib.dto.vessel.VesselDTO;
+import es.redmic.vesselslib.utils.VesselTrackingUtil;
+import es.redmic.vesselslib.utils.VesselUtil;
 
 @Service
 public class AISService {
@@ -35,14 +42,17 @@ public class AISService {
 
 	protected static Logger logger = LogManager.getLogger();
 
-	@Value("${broker.topic.realtime.tracking.vessels.key.prefix}")
-	private String prefix;
-
 	@Value("${aishub.service.url}")
 	private String urlAIS;
 
 	@Value("${broker.topic.realtime.tracking.vessels}")
-	private String TOPIC;
+	private String VESSEL_TRACKING_TOPIC;
+
+	@Value("${broker.topic.realtime.ais}")
+	private String AIS_TOPIC;
+
+	@Value("${broker.topic.realtime.vessels}")
+	private String VESSEL_TOPIC;
 
 	@Value("${file.delimiter.csv}")
 	private String delimiterCSV;
@@ -53,8 +63,50 @@ public class AISService {
 	private String nameCompressFile = "ais.zip";
 	private String nameFile = "data.csv";
 
+	@Value("${qflag.default}")
+	private String QFLAG_DEFAULT;
+
+	@Value("${vflag.default}")
+	private String VFLAG_DEFAULT;
+
+	@Value("${vesseltracking-activity-id}")
+	protected String activityId;
+
 	@Autowired
-	private KafkaTemplate<String, AISTrackingDTO> kafkaTemplate;
+	private KafkaTemplate<String, AISTrackingDTO> aisTemplate;
+
+	@Autowired
+	private KafkaTemplate<String, CommonDTO> vesselTemplate;
+
+	@Value("${bboxFilter.bottomRightLat}")
+	private double bottomRightLat; // = 26
+
+	@Value("${bboxFilter.bottomRightLon}")
+	private double bottomRightLon; // = -10,
+
+	@Value("${bboxFilter.topLeftLat}")
+	private double topLeftLat; // = 30,
+
+	@Value("${bboxFilter.topLeftLon}")
+	private double topLeftLon; // = -21;
+
+	@Value("#{'${destFilter}'.split(',')}")
+	private List<String> destFilter;
+
+	Envelope envelopeJts;
+
+	@PostConstruct
+	private void aisServicePostConstruct() {
+
+		envelopeJts = new Envelope(bottomRightLon, topLeftLon, topLeftLat, bottomRightLat);
+	}
+
+	// @formatter:off
+	
+	private long maxDateBefore = -1,
+			maxDateCurrent = -1;
+	
+	// @formatter:on
 
 	public void fetchData() {
 
@@ -102,6 +154,9 @@ public class AISService {
 			processRow(row);
 		}
 
+		maxDateBefore = maxDateCurrent;
+		maxDateCurrent = -1;
+
 		file.delete();
 	}
 
@@ -126,15 +181,65 @@ public class AISService {
 
 		dto.buildFromMap(row);
 
-		publishToKafka(dto);
+		if (dataFulfillConstraints(dto)) {
+			publishToKafka(dto);
+		}
 	}
 
-	private void publishToKafka(AISTrackingDTO dto) {
+	private boolean dataFulfillConstraints(AISTrackingDTO dto) {
 
-		ListenableFuture<SendResult<String, AISTrackingDTO>> future = kafkaTemplate.send(TOPIC,
-				prefix + dto.getMmsi().toString(), dto);
+		if (dto.getMmsi() == null && dto.getTstamp() == null) {
+			return false;
+		}
 
-		future.addCallback(new SendListener());
+		if (dto.getTstamp().getMillis() < maxDateBefore) {
+			return false;
+		}
+
+		if (dto.getTstamp().getMillis() > maxDateCurrent) {
+			maxDateCurrent = dto.getTstamp().getMillis();
+		}
+		return true;
+	}
+
+	private void publishToKafka(AISTrackingDTO aisTracking) {
+
+		// @formatter:off
+		String vesselId = VesselUtil.generateId(aisTracking.getMmsi()),
+				vesselTrackingId = VesselTrackingUtil.generateId(aisTracking.getMmsi(), aisTracking.getTstamp().getMillis());
+		// @formatter:on
+
+		// Envía dto de datos brutos para sink de postgresql
+		aisTemplate.send(AIS_TOPIC, vesselId, aisTracking).addCallback(new SendListener());
+
+		// Si el punto está en la zona de interés
+
+		if (isDest(aisTracking.getDest()) || pointInBbox(aisTracking.getLongitude(), aisTracking.getLatitude())) {
+
+			VesselTrackingDTO tracking = VesselTrackingUtil.convertTrackToVesselTracking(aisTracking, QFLAG_DEFAULT,
+					VFLAG_DEFAULT, activityId);
+
+			// Envía dto de tracking para procesarlo + sink
+
+			vesselTemplate.send(VESSEL_TRACKING_TOPIC, vesselTrackingId, tracking).addCallback(new SendListener());
+
+			VesselDTO vessel = tracking.getProperties().getVessel();
+
+			// Envía dto de vessel para procesarlo
+			vesselTemplate.send(VESSEL_TOPIC, vesselId, vessel).addCallback(new SendListener());
+		}
+	}
+
+	private boolean isDest(String dest) {
+
+		if (dest == null)
+			return false;
+
+		return destFilter.stream().anyMatch(str -> dest.toLowerCase().contains(str.toLowerCase()));
+	}
+
+	private boolean pointInBbox(Double x, Double y) {
+		return envelopeJts.contains(new Coordinate(x, y));
 	}
 
 	private void removeZipFile() {
