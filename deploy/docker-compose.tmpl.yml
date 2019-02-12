@@ -9,7 +9,7 @@ services:
       - SPRING_PROFILES_ACTIVE
       - AISHUB_SERVICE_USERNAME
       - APP_SCHEDULING_ENABLE
-      - JAVA_OPTS=-XX:MaxRAMFraction=1
+      - JAVA_OPTS=-XX:MaxRAMFraction=2
     networks:
       - kafka-net
       - redmic-net
