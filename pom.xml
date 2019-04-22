@@ -4,28 +4,20 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.0.RELEASE</version>
+		<groupId>es.redmic</groupId>
+		<artifactId>server-parent</artifactId>
+		<version>0.3.0</version>
 		<relativePath />
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>es.redmic</groupId>
 	<artifactId>ais</artifactId>
 	<packaging>jar</packaging>
-	<version>0.8.0-feature-updateCI</version>
+	<version>0.8.0-feature-applyLicense</version>
 	<name>AIS</name>
 	<description>AIS rest consumer. Read vessels tracking and send to REDMIC system</description>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<java.version>1.8</java.version>
-		<tomcat.version>8.5.28</tomcat.version>
-
 		<!-- REDMIC -->
 		<redmic.broker-lib.version>0.8.0</redmic.broker-lib.version>
 		<redmic.vessels-lib.version>0.8.0</redmic.vessels-lib.version>
@@ -37,9 +29,6 @@
 		<kafka.version>2.0.1</kafka.version>
 		<commons-io.version>2.6</commons-io.version>
 		<powermock.version>1.7.3</powermock.version>
-
-		<!-- Plugins -->
-		<jacoco.version>0.8.1</jacoco.version>
 	</properties>
 
 	<dependencies>
@@ -92,20 +81,8 @@
 			<version>${commons-io.version}</version>
 			<scope>provided</scope>
 		</dependency>
-
-		<!-- Logs -->
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-		</dependency>
-
+		
 		<!-- tests -->
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -185,26 +162,6 @@
 					<finalName>ais</finalName>
 					<outputDirectory>dist</outputDirectory>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacoco.version}</version>
-				<executions>
-					<execution>
-						<id>pre-unit-test</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>post-unit-test</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
