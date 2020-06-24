@@ -2,14 +2,13 @@ version: '3.5'
 
 services:
   ais:
-    ports:
-      - target: ${MICROSERVICE_PORT}
-        published: ${MICROSERVICE_PORT}
-        mode: host
+    environment:
+      SPRING_PROFILES_ACTIVE: pre
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 512M
+          cpus: '${RESOURCES_LIMITS_CPUS:-0.5}'
+          memory: ${RESOURCES_LIMITS_MEMORY:-512M}
         reservations:
-          memory: 410M
+          cpus: '${RESOURCES_RESERVATIONS_CPUS:-0.001}'
+          memory: ${RESOURCES_RESERVATIONS_MEMORY:-410M}

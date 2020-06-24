@@ -2,13 +2,13 @@ version: '3.5'
 
 services:
   ais:
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
     deploy:
-      placement:
-        constraints:
-          - node.role == worker
       resources:
         limits:
-          cpus: '0.5'
-          memory: 1G
+          cpus: '${RESOURCES_LIMITS_CPUS:-0.5}'
+          memory: ${RESOURCES_LIMITS_MEMORY:-1G}
         reservations:
-          memory: 820M
+          cpus: '${RESOURCES_RESERVATIONS_CPUS:-0.001}'
+          memory: ${RESOURCES_RESERVATIONS_MEMORY:-820M}
