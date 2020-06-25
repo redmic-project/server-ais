@@ -2,42 +2,54 @@ version: '3.5'
 
 services:
   ais:
-    image: ${IMAGE_NAME}:${IMAGE_TAG:-latest}
+    image: ${IMAGE_NAME:-registry.gitlab.com/redmic-project/server/ais}:${IMAGE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: ${DOCKERFILE:-Dockerfile}
+      args:
+        PARENT_IMAGE_NAME:
+        PARENT_IMAGE_TAG:
+        MICROSERVICE_PORT:
     environment:
-      - MICROSERVICE_NAME
-      - MICROSERVICE_PORT
-      - SPRING_PROFILES_ACTIVE
-      - AISHUB_SERVICE_USERNAME
-      - APP_SCHEDULING_ENABLE
-      - JAVA_OPTS=-XX:MaxRAMFraction=2
+      MICROSERVICE_NAME:
+      MICROSERVICE_PORT:
+      AISHUB_SERVICE_USERNAME:
+      APP_SCHEDULING_ENABLE:
+      JAVA_OPTS: -XX:MaxRAMFraction=2
     networks:
-      - kafka-net
-      - redmic-net
-      - traefik-net
+      kafka-net:
+      redmic-net:
+      traefik-net:
     healthcheck:
       test: wget --spider -q http://localhost:${MICROSERVICE_PORT}/api/${MICROSERVICE_NAME}/actuator/health
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 2m
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-10s}
+      retries: ${HEALTHCHECK_RETRIES:-3}
+      start_period: ${HEALTHCHECK_START_PERIOD:-2m}
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: ${REPLICAS:-1}
       labels:
         traefik.frontend.rule: Host:${PUBLIC_HOSTNAME};PathPrefix:/api/${MICROSERVICE_NAME}
         traefik.backend: ${MICROSERVICE_NAME}
         traefik.port: "${MICROSERVICE_PORT}"
       restart_policy:
-        condition: on-failure
-        delay: 1m
-        window: 3m
+        delay: ${RESTART_DELAY:-1m}
+      update_config:
+        delay: ${UPDATE_DELAY:-2m}
 
 networks:
   kafka-net:
+    name: ${KAFKA_NET_NAME:-kafka-net}
+    driver: ${KAFKA_NET_DRIVER:-overlay}
     external: true
 
   redmic-net:
+    name: ${REDMIC_NET_NAME:-redmic-net}
+    driver: ${REDMIC_NET_DRIVER:-overlay}
     external: true
 
   traefik-net:
+    name: ${TRAEFIK_NET_NAME:-traefik-net}
+    driver: ${TRAEFIK_NET_DRIVER:-overlay}
     external: true

@@ -11,31 +11,29 @@ include:
   - project: 'redmic-project/gitlab-ci-templates'
     ref: master
     file: '/deployment.yml'
+  - project: 'redmic-project/gitlab-ci-templates'
+    ref: master
+    file: '/deployment-custom-image.yml'
 
 stages:
   - build
   - license-list
+  - pre-package
   - package
-  - test-package
+  - post-package
   - deploy
 
 variables:
-  DOCKER_BUILD_ARGS: --build-arg PARENT_IMAGE_NAME=${REDMIC_SERVER_IMAGE_NAME} --build-arg PARENT_IMAGE_TAG=${REDMIC_SERVER_IMAGE_TAG}
-  STACK: vessel
+  PROJECT_PARENT_NAME: vessel
+
+.docker-build:
+  variables:
+    DBLD_PARENT_IMAGE_NAME: ${REDMIC_SERVER_IMAGE_NAME}
+    DBLD_PARENT_IMAGE_TAG: ${REDMIC_SERVER_IMAGE_TAG}
 
 .deploy:
-  script:
-    - >
-      deploy.sh IMAGE_NAME=${IMAGE_NAME} IMAGE_TAG=${IMAGE_TAG} COMPOSE_FILE=${COMPOSE_FILE}
-      SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} AISHUB_SERVICE_USERNAME=${AISHUB_SERVICE_USERNAME}
-      APP_SCHEDULING_ENABLE=${APP_SCHEDULING_ENABLE} PUBLIC_HOSTNAME=${PUBLIC_HOSTNAME}
+  variables:
+    STACK: ${PROJECT_PARENT_NAME}
+    SERVICES_TO_CHECK: ${PROJECT_PARENT_NAME}_${CI_PROJECT_NAME}
   environment:
     url: https://${PUBLIC_HOSTNAME}/api/${CI_PROJECT_NAME}
-
-.deploy-development:
-  variables:
-    SPRING_PROFILES_ACTIVE: pre
-
-.deploy-production:
-  variables:
-    SPRING_PROFILES_ACTIVE: prod
