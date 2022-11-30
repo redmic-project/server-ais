@@ -1,4 +1,4 @@
-version: '3.5'
+version: '3.9'
 
 services:
   ais:
@@ -9,6 +9,7 @@ services:
       args:
         PARENT_IMAGE_NAME:
         PARENT_IMAGE_TAG:
+        MICROSERVICE_NAME:
         MICROSERVICE_PORT:
     environment:
       MICROSERVICE_NAME:
@@ -29,10 +30,6 @@ services:
     deploy:
       mode: replicated
       replicas: ${REPLICAS:-1}
-      labels:
-        traefik.frontend.rule: Host:${PUBLIC_HOSTNAME};PathPrefix:/api/${MICROSERVICE_NAME}
-        traefik.backend: ${MICROSERVICE_NAME}
-        traefik.port: "${MICROSERVICE_PORT}"
       restart_policy:
         delay: ${RESTART_DELAY:-1m}
       update_config:
