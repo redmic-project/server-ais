@@ -13,7 +13,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>ais</artifactId>
 	<packaging>jar</packaging>
-	<version>0.9.0</version>
+	<version>0.9.0-feature-addInternalUrl</version>
 	<name>AIS</name>
 	<description>AIS rest consumer. Read vessels tracking and send to REDMIC system</description>
 
