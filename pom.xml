@@ -27,7 +27,7 @@
 
 		<!-- OTHERS -->
 		<kafka.version>2.0.1</kafka.version>
-		<commons-io.version>2.6</commons-io.version>
+		<commons-io.version>2.14.0</commons-io.version>
 		<powermock.version>1.7.3</powermock.version>
 	</properties>
 
