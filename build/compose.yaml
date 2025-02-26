@@ -1,0 +1,11 @@
+services:
+  ais:
+    image: ${IMAGE_NAME:-registry.gitlab.com/redmic-project/server/ais}:${IMAGE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: ${DOCKERFILE:-build/Dockerfile}
+      args:
+        PARENT_IMAGE_NAME:
+        PARENT_IMAGE_TAG:
+        MICROSERVICE_NAME:
+        MICROSERVICE_PORT:

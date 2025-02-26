@@ -1,31 +1,19 @@
-version: '3.9'
-
 services:
   ais:
     image: ${IMAGE_NAME:-registry.gitlab.com/redmic-project/server/ais}:${IMAGE_TAG:-latest}
-    build:
-      context: ..
-      dockerfile: ${DOCKERFILE:-Dockerfile}
-      args:
-        PARENT_IMAGE_NAME:
-        PARENT_IMAGE_TAG:
-        MICROSERVICE_NAME:
-        MICROSERVICE_PORT:
     environment:
-      MICROSERVICE_NAME:
-      MICROSERVICE_PORT:
       AISHUB_SERVICE_USERNAME:
       APP_SCHEDULING_ENABLE:
-      JAVA_OPTS: -XX:MaxRAMFraction=2
+      JAVA_OPTS:
     networks:
-      kafka-net:
       redmic-net:
-      traefik-net:
+      kafka-net:
+      metric-net:
     healthcheck:
       test: wget --spider -q http://localhost:${MICROSERVICE_PORT}/api/${MICROSERVICE_NAME}/actuator/health
       interval: ${HEALTHCHECK_INTERVAL:-30s}
       timeout: ${HEALTHCHECK_TIMEOUT:-10s}
-      retries: ${HEALTHCHECK_RETRIES:-3}
+      retries: ${HEALTHCHECK_RETRIES:-5}
       start_period: ${HEALTHCHECK_START_PERIOD:-2m}
     deploy:
       mode: replicated
@@ -36,17 +24,17 @@ services:
         delay: ${UPDATE_DELAY:-2m}
 
 networks:
-  kafka-net:
-    name: ${KAFKA_NET_NAME:-kafka-net}
-    driver: ${KAFKA_NET_DRIVER:-overlay}
-    external: true
-
   redmic-net:
     name: ${REDMIC_NET_NAME:-redmic-net}
     driver: ${REDMIC_NET_DRIVER:-overlay}
     external: true
 
-  traefik-net:
-    name: ${TRAEFIK_NET_NAME:-traefik-net}
-    driver: ${TRAEFIK_NET_DRIVER:-overlay}
+  kafka-net:
+    name: ${KAFKA_NET_NAME:-kafka-net}
+    driver: ${KAFKA_NET_DRIVER:-overlay}
+    external: true
+
+  metric-net:
+    name: ${METRIC_NET_NAME:-metric-net}
+    driver: ${METRIC_NET_DRIVER:-overlay}
     external: true
